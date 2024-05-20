@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  app:
+    build: ./app
+    container_name: flask_sl6
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql://sl6_user:sl6_psw@db:5432/sl6_db
+    volumes:
+      - ./app:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - backend
+  db:
+    image: postgres:16
+    container_name: db
+    volumes:
+      - .:/var/lib/postgres/data/
+    env_file: .env
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+  adminer:
+    image: adminer:4.8.1-standalone
+    container_name: adminer
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge
